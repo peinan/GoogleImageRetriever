@@ -65,6 +65,10 @@ class GoogleImageRetriever:
       image_name = os.path.split(url)[-1]
       file_path  = current_dir + '/' + image_name
       if base_file_path:
+        base_dir = os.path.dirname(base_file_path)
+        if not os.path.exists(base_dir):
+          print(base_dir)
+          os.makedirs(base_dir)
         file_path = "%s_%03d_%s" % (base_file_path, count, image_name)
       self.download(url, file_path)
       time.sleep(interval)
@@ -89,7 +93,7 @@ class GoogleImageRetriever:
     return True
 
 
-  def run(self, verbose=True):
+  def run(self, base_file_path=None, verbose=True):
     URL     = 'https://www.googleapis.com/customsearch/v1'
     payload = self.build_payload(num=10)
     print('QUERIES:', payload['q'])
@@ -97,7 +101,16 @@ class GoogleImageRetriever:
     result = requests.get(URL, params=payload)
 
     image_urls = self.extract_image_url(result)
-    self.download_images(image_urls)
+    self.download_images(image_urls, base_file_path)
+
+
+  def usage(self):
+    print("\n",
+    "Usage: run_retriever.py [output_basepath]\n",
+    "\n",
+    "output_basepath:\n",
+    "  /aaa/bbb/ccc will be /aaa/bbb/ccc_000_ddd.jpg\n",
+    "\n")
 
 
 if __name__ == '__main__':
