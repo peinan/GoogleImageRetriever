@@ -38,11 +38,15 @@ class GoogleImageRetriever:
   def extract_image_url(self, result):
     result_json = result.json()
     image_urls = []
-    for i, item in enumerate(result_json['items']):
-      if not self.is_image(item):
-        continue
-      image_url = item['link']
-      image_urls.append(image_url)
+    try:
+      for i, item in enumerate(result_json['items']):
+        if not self.is_image(item):
+          continue
+        image_url = item['link']
+        image_urls.append(image_url)
+    except:
+      print(result.url)
+      print(json.dumps(result_json, indent=2))
 
     return image_urls
 
@@ -95,7 +99,7 @@ class GoogleImageRetriever:
 
   def run(self, base_file_path=None, verbose=True):
     URL     = 'https://www.googleapis.com/customsearch/v1'
-    payload = self.build_payload(num=10)
+    payload = self.build_payload(num=1000)
     print('QUERIES:', payload['q'])
 
     result = requests.get(URL, params=payload)
