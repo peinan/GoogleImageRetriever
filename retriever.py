@@ -4,26 +4,103 @@
 # Author: Peinan ZHANG
 # Created at: 2017-02-10
 
-import requests, json
+import requests
+from PIL import Image
+import json, time, os
 
-# Setup
-URL = 'https://www.googleapis.com/customsearch/v1'
-APIKEY = open('google_api.token').readline().rstrip()
-CXID = open('google_custom_search_engine_id.token').readline().rstrip()
-QUERIES = [
-    '化粧'
-]
+class GoogleImageRetriever:
+  def build_payload(self,
+                    google_api_fp='google_api.token',
+                    google_custom_search_engine_id_fp='google_custom_search_engine_id.token',
+                    queries_fp='queries.txt',
+                    num=10,
+                    start=1):
 
-payload = {
-    'key': APIKEY,
-    'cx': CXID,
-    'q': ' '.join(QUERIES),
-    # 'imageType': 'image',
-    'num': 1,
-    'start': 1
-}
+    APIKEY  = open(google_api_fp).readline().rstrip()
+    CXID    = open(google_custom_search_engine_id_fp).readline().rstrip()
+    QUERIES = ' '.join([ line.rstrip() for line in open(queries_fp).readlines() ])
+    TYPE    = 'image'
+    NUM     = num
+    START   = start
 
-result = requests.get(URL, params=payload)
-print('Request URL:', result.url)
-print('Result')
-print(result)
+    payload = {
+        'key': APIKEY,
+        'cx':  CXID,
+        'q':   QUERIES,
+        'searchType': TYPE,
+        'num': NUM,
+        'start': START
+    }
+
+    return payload
+
+
+  def extract_image_url(self, result):
+    result_json = result.json()
+    image_urls = []
+    for i, item in enumerate(result_json['items']):
+      if not self.is_image(item):
+        continue
+      image_url = item['link']
+      image_urls.append(image_url)
+
+    return image_urls
+
+
+  def is_image(self, item):
+    if not 'image' in item['mime']:
+      return False
+
+    return True
+
+
+  def is_valid(self, item):
+    return True
+
+
+  def download_images(self, urls, base_file_path=None, interval=5):
+    count = 0
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    for url in urls:
+      image_name = os.path.split(url)[-1]
+      file_path  = current_dir + '/' + image_name
+      if base_file_path:
+        file_path = "%s_%03d_%s" % (base_file_path, count, image_name)
+      self.download(url, file_path)
+      time.sleep(interval)
+
+
+  def download(self, url, file_path):
+    response = requests.get(url, stream=True)
+    print("[INFO] downloading '{}'".format(url))
+    if response.status_code != 200:
+      print("[FAIL] failed to download '{}'".format(url))
+      return False
+
+    try:
+      with open(file_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=2048):
+          f.write(chunk)
+      print("[INFO] ---> downloaded to '{}'".format(file_path))
+    except:
+      print("[FAIL] ---> download failed".format(url))
+      return False
+
+    return True
+
+
+  def run(self, verbose=True):
+    URL     = 'https://www.googleapis.com/customsearch/v1'
+    payload = self.build_payload(num=10)
+    print('QUERIES:', payload['q'])
+
+    result = requests.get(URL, params=payload)
+
+    image_urls = self.extract_image_url(result)
+    self.download_images(image_urls)
+
+
+if __name__ == '__main__':
+  retriever = GoogleImageRetriever()
+  retriever.run()
+
