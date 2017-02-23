@@ -9,9 +9,14 @@ import sys
 
 if __name__ == '__main__':
   retriever = GoogleImageRetriever()
+  max_loop = 1
+
   if len(sys.argv) < 2:
     retriever.usage()
     sys.exit(-1)
 
-  retriever.run(sys.argv[1])
+  if len(sys.argv) == 3:
+    max_loop = sys.argv[2]
+
+  retriever.run(sys.argv[1], max_loop)
 

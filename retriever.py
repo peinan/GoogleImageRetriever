@@ -97,9 +97,9 @@ class GoogleImageRetriever:
     return True
 
 
-  def run(self, base_file_path=None, verbose=True):
+  def run(self, base_file_path=None, start=1, verbose=True):
     URL     = 'https://www.googleapis.com/customsearch/v1'
-    payload = self.build_payload(num=1000)
+    payload = self.build_payload(start=start)
     print('QUERIES:', payload['q'])
 
     result = requests.get(URL, params=payload)
