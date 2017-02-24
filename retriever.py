@@ -28,7 +28,7 @@ class GoogleImageRetriever:
         'cx':  CXID,
         'q':   QUERIES,
         'searchType': TYPE,
-        'num': NUM,
+        # 'num': NUM,
         'start': START
     }
 
@@ -63,9 +63,8 @@ class GoogleImageRetriever:
 
 
   def download_images(self, urls, base_file_path=None, interval=5):
-    count = 0
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    for url in urls:
+    for n, url in enumerate(urls):
       image_name = os.path.split(url)[-1]
       file_path  = current_dir + '/' + image_name
       if base_file_path:
@@ -73,7 +72,7 @@ class GoogleImageRetriever:
         if not os.path.exists(base_dir):
           print(base_dir)
           os.makedirs(base_dir)
-        file_path = "%s_%03d_%s" % (base_file_path, count, image_name)
+        file_path = "%s_%03d_%s" % (base_file_path, n, image_name)
       self.download(url, file_path)
       time.sleep(interval)
 
@@ -97,9 +96,9 @@ class GoogleImageRetriever:
     return True
 
 
-  def run(self, base_file_path=None, verbose=True):
+  def run(self, base_file_path=None, num=10, start=1, verbose=True):
     URL     = 'https://www.googleapis.com/customsearch/v1'
-    payload = self.build_payload(num=1000)
+    payload = self.build_payload(num=num, start=start)
     print('QUERIES:', payload['q'])
 
     result = requests.get(URL, params=payload)
@@ -115,9 +114,4 @@ class GoogleImageRetriever:
     "output_basepath:\n",
     "  /aaa/bbb/ccc will be /aaa/bbb/ccc_000_ddd.jpg\n",
     "\n")
-
-
-if __name__ == '__main__':
-  retriever = GoogleImageRetriever()
-  retriever.run()
 
