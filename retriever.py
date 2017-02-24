@@ -9,6 +9,10 @@ from PIL import Image
 import json, time, os
 
 class GoogleImageRetriever:
+  def __init__(self):
+    self.memory_bank = []
+
+
   def build_payload(self,
                     google_api_fp='google_api.token',
                     google_custom_search_engine_id_fp='google_custom_search_engine_id.token',
@@ -28,7 +32,7 @@ class GoogleImageRetriever:
         'cx':  CXID,
         'q':   QUERIES,
         'searchType': TYPE,
-        # 'num': NUM,
+        'num': NUM,
         'start': START
     }
 
@@ -58,14 +62,17 @@ class GoogleImageRetriever:
     return True
 
 
-  def is_valid(self, item):
-    return True
-
-
   def download_images(self, urls, base_file_path=None, interval=5):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     for n, url in enumerate(urls):
       image_name = os.path.split(url)[-1]
+
+      # duplication check
+      if image_name in self.memory_bank:
+        continue
+      else:
+        self.memory_bank.append(image_name)
+
       file_path  = current_dir + '/' + image_name
       if base_file_path:
         base_dir = os.path.dirname(base_file_path)
@@ -99,7 +106,7 @@ class GoogleImageRetriever:
   def run(self, base_file_path=None, num=10, start=1, verbose=True):
     URL     = 'https://www.googleapis.com/customsearch/v1'
     payload = self.build_payload(num=num, start=start)
-    print('QUERIES:', payload['q'])
+    print(payload)
 
     result = requests.get(URL, params=payload)
 

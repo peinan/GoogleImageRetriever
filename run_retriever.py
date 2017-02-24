@@ -9,8 +9,9 @@ import sys
 
 if __name__ == '__main__':
   retriever = GoogleImageRetriever()
-  num = 10
-  start = 1
+  NUM = 10
+  MAX_PAGE = 1
+
   if len(sys.argv) < 2:
     retriever.usage()
     sys.exit(-1)
@@ -18,7 +19,12 @@ if __name__ == '__main__':
   base_file_path = sys.argv[1]
 
   if len(sys.argv) == 3:
-    start = sys.argv[2]
+    MAX_PAGE = int(sys.argv[2])
 
-  for n_epoch in range(start):
-    retriever.run("%s_%02d" % (base_file_path, n_epoch), num, n_epoch)
+  if len(sys.argv) == 4:
+    NUM = int(sys.argv[3])
+
+  for n_epoch in range(1, MAX_PAGE + 1):
+    retriever.run(base_file_path="%s_%02d" % (base_file_path, n_epoch),\
+                  num=NUM,\
+                  start=n_epoch)
