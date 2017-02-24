@@ -22,4 +22,3 @@ if __name__ == '__main__':
 
   for n_epoch in range(start):
     retriever.run("%s_%02d" % (base_file_path, n_epoch), num, n_epoch)
-
