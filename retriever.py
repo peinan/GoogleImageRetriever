@@ -115,10 +115,16 @@ class GoogleImageRetriever:
 
 
   def usage(self):
-    print("\n",
-    "Usage: run_retriever.py [output_basepath]\n",
-    "\n",
-    "output_basepath:\n",
-    "  /aaa/bbb/ccc will be /aaa/bbb/ccc_000_ddd.jpg\n",
-    "\n")
+    print(
+    """
+    Usage: run_retriever.py [output_file_base_path] [options]
 
+    Output_file_base_path:
+      /aaa/bbb/ccc will be /aaa/bbb/ccc_000_ddd.jpg
+
+    Options
+      MAX_PAGE
+      START
+      NUM
+    """
+    )
